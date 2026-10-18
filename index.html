@@ -1,4 +1,4 @@
-<!doctype html><html lang="vi"><head><meta charset=utf8><meta name="robots" content="noindex,nofollow"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Vạn Thú Nhân Gian</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <script>
@@ -18,16 +18,67 @@ window.GAME_DATA = {
   // R1 (D23): milestone nghiên cứu, chồng lên gameplay M7 (không thay M7) nên base giữ "M7": tính năng M7 vẫn hiện "Đang mở"
   // R1b (D24): thêm dáng nhân vật nam/nữ (dữ liệu đi kèm, không vào mô hình); vẫn base "M7"
     // R2 (D25, D26): ghi dữ liệu nghiên cứu; vẫn base "M7"
-  meta: { title: "Vạn Thú Nhân Gian", version: "0.9.2-R2", gdd: "v0.6", milestone: "R2", base: "M7" },
+    // R3b (D27): phép thử T01–T06 ghi hành vi; vẫn base "M7"
+  meta: { title: "Vạn Thú Nhân Gian", version: "0.9.3-R3b", gdd: "v0.6", milestone: "R3b", base: "M7" },
 
   // R2 (D26): ghi dữ liệu nghiên cứu. endpoint = địa chỉ cửa nhận (Google Apps Script). TRỐNG = không xếp hàng, không gửi gì (bản artifact của admin).
   research: {
     endpoint: "https://script.google.com/macros/s/AKfycbwxM5HmD0wajXHDpi9SU_WIvrxtSo0QhG7oewyLkz6f3dVK1XdfWGzQZzYlZyYERwFc/exec",                               // địa chỉ .../exec của cửa nhận; khi đóng gói bản GitHub Pages thì điền vào đây
-    rewardKinds: ["grant", "wage", "pact", "pact-nt", "coop"], // loại bút toán là "nhận thưởng" (mở thư Hội đồng, làm công, giao lời hẹn, nghiệm thu, ca hợp tác): ghi sổ xong thì gửi hàng chờ
+    rewardKinds: ["grant", "wage", "pact", "pact-nt", "coop", "trial"], // loại bút toán là "nhận thưởng" (mở thư Hội đồng, làm công, giao lời hẹn, nghiệm thu, ca hợp tác): ghi sổ xong thì gửi hàng chờ
     queueMax: 300,                              // hàng chờ tối đa 300 bản trong máy
     batch: 20,                                  // mỗi lần gửi tối đa 20 bản
     timeoutMs: 8000,                            // mỗi lần gửi tối đa 8 giây
     maxRounds: 10                               // một mốc ghi gửi tối đa 10 lô
+  },
+
+  // R3b (D27): phép thử ghi C (hành vi). T01 là cảnh bước 24 (đã có, chỉ thêm ghi bản ghi); T02–T06 là năm cảnh mới.
+  // Mỗi cảnh: hai câu mở của NPC, ba lựa chọn (hiện theo thứ tự xáo, ghi lại là `ord`), MỘT câu đáp chung cho cả ba (D12: không khen chê, không gọi tên tính cách).
+  // Ba lựa chọn = ba nhóm ba Type rời nhau, phủ đủ 9 Type (ba đường song song của AG(2,3)). `tags` là GIẢ THUYẾT, em đã duyệt; R5 kiểm lại.
+  // Thưởng cân bằng: mọi lựa chọn cùng `reward` xu (Hội đồng → Ví). Chọn không đổi xu hay đồ khác.
+  trials: {
+    v: 1,                                       // phiên bản chữ của bộ phép thử; đổi chữ hay tags thì tăng số này để R5 tách
+    reward: 10,                                 // xu Hội đồng trả cho mỗi phép thử, như nhau cho mọi lựa chọn. GIÁ TRỊ MỚI của D27
+    from: 10,                                   // mở khi onb >= 10 (xong hẳn bước 24, đã đóng lời chúc)
+    rowLabel: "Việc đang chờ ý kiến",           // chữ của hàng trong mục "Người ở đây": không nêu đề tài
+    rowBtn: "Góp ý",                            // chữ trên nút của hàng
+    t01: { id: "T01", v: 1, tags: { kimtam: [2, 9], camquan: [3, 7, 8], thietgiap: [1, 6], none: [4, 5, 9] } }, // cảnh bước 24: bảng tags đã duyệt ở R1
+    list: [
+      { id: "T02", who: "linhdu", at: "workshop", title: "Mối hàng lớn ở Xưởng", scope: "chung",
+        open: ["Xưởng vừa nhận một mối hàng gấp đôi mọi khi, hạn giao năm ngày. Chưa thợ nào làm mẻ lớn thế này.",
+               "Hội đồng xưởng đang họp và thiếu một ý kiến từ bên ngoài. Theo bạn, xưởng nên nhận mối này thế nào?"],
+        opts: [{ id: "a", t: "Nhận ngay, chia ca từ hôm nay, thiếu người thì kéo thêm thợ ngoài vào.", tags: [3, 7, 8] },
+               { id: "b", t: "Soát lại định mức và quy trình, ai làm phần nào, rồi mới nhận.", tags: [1, 2, 6] },
+               { id: "c", t: "Chưa nhận vội, chờ xem mối hàng này có ổn định không rồi tính.", tags: [4, 5, 9] }],
+        reply: "Tôi ghi ý bạn vào biên bản họp." },
+      { id: "T03", who: "kimtam", at: "market", title: "Lô thực phẩm bị ướt ở bếp", scope: "chung",
+        open: ["Mưa đêm qua làm ướt một phần lô thực phẩm của bếp cứu trợ. Phần còn lại chưa đủ cho hết người xếp hàng sáng nay.",
+               "Hàng người đã đứng chờ trước bếp và bạn đang ở đó. Bạn làm gì trước?"],
+        opts: [{ id: "a", t: "Nói với hàng người bữa nay nhẹ hơn, mai có hàng mới, rồi đứng ra phát phần giúp bếp.", tags: [2, 7, 9] },
+               { id: "b", t: "Kiểm lô hàng, tách phần dùng được, tính ra số suất và ghi lại chỗ nào làm ướt.", tags: [1, 3, 5] },
+               { id: "c", t: "Nói thẳng chuyện này đáng giận, hỏi kho do ai giữ và vì sao để ướt.", tags: [4, 6, 8] }],
+        reply: "Tôi nghe rồi. Bếp ghi lại." },
+      { id: "T04", who: "thaihoa", at: "cityhall", title: "Bãi bốc dỡ cuối bến", scope: "chung",
+        open: ["Hai tộc cùng xin dùng bãi bốc dỡ cuối bến vào sáng thứ Hai. Bên nào cũng có lý do.",
+               "Hội đồng cần một ý kiến trước phiên họp. Bạn làm gì trước khi nói?"],
+        opts: [{ id: "a", t: "Nói luôn điều tôi thấy hợp lẽ ngay sau khi nghe hai bên.", tags: [8, 9, 1] },
+               { id: "b", t: "Đi hỏi người sống quanh bến xem ai sẽ thấy mình bị bỏ rơi, và hai bên sẽ nhìn nhau ra sao.", tags: [2, 3, 4] },
+               { id: "c", t: "Xin sổ lượt tàu và bản đồ bến, xem số liệu rồi mới nói.", tags: [5, 6, 7] }],
+        reply: "Tôi chuyển ý bạn tới phiên họp." },
+      { id: "T05", who: "bachnha", at: "bridge", title: "Thuyền tới sau giờ cảng đóng", scope: "chung",
+        open: ["Một đoàn thuyền chở rau tới bến sau giờ cảng đóng. Thuyền trưởng xin cập đêm để rau khỏi héo. Quy định cảng: không nhận thuyền sau giờ, trừ khi có người đứng ra chịu.",
+               "Tôi đang trực. Bạn đứng ngay đó. Bạn làm gì?"],
+        opts: [{ id: "a", t: "Đứng ra nhận trách nhiệm, bảo mở bến và cùng bốc rau xuống.", tags: [3, 7, 8] },
+               { id: "b", t: "Làm theo quy định cảng, giúp thuyền trưởng viết đơn xin gấp để sáng có người duyệt.", tags: [1, 2, 6] },
+               { id: "c", t: "Đứng ngoài để họ tự bàn với người trực, tôi chỉ góp lời nếu được hỏi.", tags: [4, 5, 9] }],
+        reply: "Tôi ghi giờ và ý bạn vào sổ trực." },
+      { id: "T06", who: "hacvu", at: "market", title: "Đơn bị huỷ trước ngày khai trương", scope: "chung",
+        open: ["Sáng mai tôi khai trương bộ tranh lụa mới. Vừa nãy khách đặt nhiều nhất báo huỷ đơn.",
+               "Tôi đang đứng giữa gian trưng bày và bạn vừa bước vào. Bạn làm gì?"],
+        opts: [{ id: "a", t: "Nói bộ tranh vẫn đẹp, mai sẽ có người ghé, rồi giúp treo tranh lên.", tags: [2, 7, 9] },
+               { id: "b", t: "Hỏi lý do huỷ, xem sửa được chỗ nào hoặc có khách khác nhận được không.", tags: [1, 3, 5] },
+               { id: "c", t: "Ngồi lại nghe hết, nói rằng chuyện này khó chịu và công sức đó đáng tiếc.", tags: [4, 6, 8] }],
+        reply: "Cảm ơn bạn đã ghé. Tôi sẽ tính tiếp." }
+    ]
   },
 
   // Tên ngắn của từng milestone: hiện cạnh ổ khoá, ví dụ "Mở ở M4 · kinh tế cơ bản"
@@ -38,7 +89,8 @@ window.GAME_DATA = {
     M9: "hợp đồng, ký quỹ, đầu tư", M10: "hệ quả thế giới", M11: "thử thách sáng tạo", M12: "hồ sơ năng lực",
     R1: "ba câu và chọn tộc", // R1 (D23): lộ trình nghiên cứu R0–R5 của FOUNDATION
     R1b: "dáng nhân vật nam, nữ", // R1b (D24)
-    R2: "ghi dữ liệu nghiên cứu" // R2 (D25, D26)
+    R2: "ghi dữ liệu nghiên cứu", // R2 (D25, D26)
+    R3b: "phép thử ghi hành vi" // R3b (D27)
   },
 
   // Ba không gian người chơi thấy (GDD §14.1). ms = milestone mở tính năng; null = chưa xếp lịch
@@ -1594,6 +1646,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .tb.lk:hover{background:rgba(20,17,17,.06);color:var(--ink-2)}
 .tb .lk{width:12px;height:12px}
 .ppl + .inote{margin:6px 0 0}
+.ppl li.trq{padding:5px 0 7px 50px}                                    /* R3b: hàng "Việc đang chờ ý kiến": thụt vào ngang chữ của tộc trưởng ở trên (chân dung 40px + khoảng cách 10px); không chân dung, không dấu son */
+.ppl li.trq .pr{font-size:12px;color:var(--ink-2)}
 
 /* ── M3: màn hội thoại: tấm lụa ngang hai trục son, chân dung bên trái ── */
 .talk{position:absolute;inset:0;z-index:5;display:grid;align-items:end;justify-items:center;padding-left:var(--gut-l);padding-right:var(--gut-r);padding-block:18px 26px}
@@ -1866,7 +1920,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   .tpanel .crod{display:none}
   .tpt{min-height:0;height:clamp(118px,22vh,170px);border:1px solid var(--ink);border-bottom:0}
   .tseal{width:28px;height:28px;font-size:20px;line-height:28px;left:8px;top:8px}
-  .tmain{border:1px solid var(--ink);padding:12px 14px 10px;max-height:none}
+  .tmain{border:1px solid var(--ink);padding:12px 14px 10px;max-height:calc(100vh - clamp(118px,22vh,170px) - 30px);max-height:calc(100dvh - clamp(118px,22vh,170px) - 30px)} /* R3b: trước đây max-height:none nên ba lựa chọn dài ở màn 320×640 tràn khỏi đáy; nay khung chữ cao tối đa = màn trừ chân dung, dài hơn thì cuộn trong khung (đã có overflow:auto) */
   .thead h2{font-size:22px}
   .tsay{font-size:15px}
   .tsay.nr{font-size:16.5px}
@@ -2229,7 +2283,8 @@ function freshState() {                         // trạng thái mặc định c
     journal: freshJournal(),                    // M5: nhật ký riêng tư {list, draft}
     qui: null,                                  // M5: màn hệ quả / nhật ký đang mở {v, id}; tải lại thì mở lại đúng màn
     menh: null,                                 // M5b (D18): mệnh bàn đang gắn {id, at}; null = không gắn (game chạy y như M5). Chỉ lưu mã người, không lưu ngày giờ sinh
-    clan: null                                  // R1 (D23 d): { q: { v, a, ord, ms, q, conf, alt }, b, at, hist: [{ b, at }] }; null = chưa làm ba câu / chưa chọn tộc (người mới đang tạo, hoặc người chơi từ bản trước R1)
+    clan: null,                                 // R1 (D23 d): { q: { v, a, ord, ms, q, conf, alt }, b, at, hist: [{ b, at }] }; null = chưa làm ba câu / chưa chọn tộc (người mới đang tạo, hoặc người chơi từ bản trước R1)
+    trials: {}                                  // R3b (D27): phép thử đã làm / đang làm dở { T01…T06: { ord, t0, opt, at } }. Save cũ không có → {} . Không lấy từ sổ vì sổ bị gộp khi quá 500 dòng
   };
 }
 function freshJournal() { return { list: [], draft: null }; } // M5: nhật ký trống: chưa có trang nào, chưa có bản nháp
@@ -2298,7 +2353,11 @@ function cleanDraft(d, clanOnly) {             // bản nháp màn tạo nhân v
 }
 const isCom = (id) => D.communities.some((c) => c.id === id); // id tộc có thật không
 const QLINES = ['pact', 'coop'];                // M5: hai tuyến hội thoại của bước 25: giao lời hẹn, lời mời hợp tác
-const isLine = (id) => isCom(id) || id === 'step24' || QLINES.includes(id); // tuyến hội thoại có thật: 9 tộc trưởng + cảnh bước 24 + hai cảnh M5
+const TD = D.trials, TLIST = TD.list;           // R3b: cấu hình các phép thử T02–T06 (GAME_DATA.trials)
+const trLine = (t) => 'tr' + t.id.slice(1);     // mã tuyến hội thoại của một phép thử: "T02" → "tr02"
+const TLINES = TLIST.map(trLine);               // ['tr02', …, 'tr06']
+const trOf = (id) => TLIST.find((t) => trLine(t) === id) || null; // tra phép thử theo mã tuyến; lạ thì null
+const isLine = (id) => isCom(id) || id === 'step24' || QLINES.includes(id) || TLINES.includes(id); // tuyến hội thoại có thật: 9 tộc trưởng + cảnh bước 24 + hai cảnh M5 + năm cảnh phép thử R3b
 function cleanNpc(n, onb) {                     // làm sạch phần M3 của save: id lạ, câu lạ, kiểu sai đều bỏ
   const f = freshNpc(); if (!n || typeof n !== 'object') return f;
   if (n.met && typeof n.met === 'object') for (const id in n.met) if (isCom(id) && typeof n.met[id] === 'number') f.met[id] = n.met[id]; // chỉ nhận tộc có thật
@@ -2413,6 +2472,38 @@ function cleanQui(u) {                          // màn M5 đang mở: chỉ nh�
   if (!u || typeof u !== 'object' || !['result', 'write', 'list', 'read'].includes(u.v)) return null; // màn lạ hoặc sai kiểu: không mở màn nào
   return { v: u.v, id: Number.isInteger(u.id) ? u.id : null }; // id = trang nhật ký đang đọc
 }
+/* ----- R3b (D27): phép thử. state.trials = { T01…T06: { ord, t0, opt, at } } ----- */
+const T_IDS = ['T01'].concat(TLIST.map((t) => t.id)); // mọi phép thử có thể có trong save
+function trOptOK(tid, opt) {                    // `opt` có phải mã lựa chọn hợp lệ của phép thử tid không
+  if (tid === 'T01') return Object.prototype.hasOwnProperty.call(TD.t01.tags, opt); // T01: kimtam / camquan / thietgiap / none
+  const t = TLIST.find((x) => x.id === tid); return !!t && t.opts.some((o) => o.id === opt); // T02–T06: a / b / c
+}
+function cleanTrials(v) {                       // làm sạch state.trials: id lạ, kiểu sai đều bỏ
+  const out = {}; if (!v || typeof v !== 'object') return out; // save cũ (trước R3b) không có trường này → rỗng
+  for (const tid of T_IDS) {                    // chỉ nhận phép thử có thật
+    const r = v[tid]; if (!r || typeof r !== 'object') continue;
+    const ordOK = Array.isArray(r.ord) && r.ord.length === 3 && ['a', 'b', 'c'].every((k) => r.ord.includes(k)); // thứ tự đã hiện: phải là hoán vị của a, b, c
+    out[tid] = {
+      ord: ordOK ? r.ord.slice() : null,        // thứ tự ba lựa chọn đã hiện (T01: null vì thứ tự cố định)
+      t0: Number.isFinite(r.t0) && r.t0 > 0 ? r.t0 : 0, // lúc câu hỏi chính hiện xong (để tính ms), 0 = chưa
+      opt: typeof r.opt === 'string' && trOptOK(tid, r.opt) ? r.opt : null, // lựa chọn đầu tiên; null = chưa chọn
+      at: Number.isFinite(r.at) && r.at > 0 ? r.at : 0 // lúc chọn
+    };
+  }
+  return out;
+}
+function mergeTrials() {                        // tab khác (cùng nhân vật) vừa xong một phép thử: lấy về; xong trước thì thắng ("lựa chọn đầu tiên là bản ghi")
+  if (!state.char) return false;
+  const s = readSave(); if (!s || s.v !== 7 || s.firstAt !== state.firstAt || !s.trials) return false; // khác nhân vật hoặc đĩa chưa có trường này
+  const d = cleanTrials(s.trials); let ch = false; // d = phép thử trên đĩa, đã làm sạch
+  for (const tid in d) {
+    const x = d[tid], m = state.trials[tid];
+    if (!x.opt) continue;                       // đĩa mới mở dở, chưa chọn: không có gì để lấy
+    if (!m || !m.opt || x.at < m.at) { state.trials[tid] = x; ch = true; } // mình chưa xong, hoặc đĩa xong trước: lấy của đĩa
+  }
+  return ch;
+}
+function refreshTrials() { if (state.player.inside) renderInside(); } // sau khi lấy kết quả từ tab khác: vẽ lại để hàng "Việc đang chờ ý kiến" biến mất
 function sanitize(s) {                          // gộp save cũ vào mặc định, bỏ giá trị sai kiểu
   const f = freshState();                       // bắt đầu từ bản sạch
   if (!s || typeof s !== 'object' || ![1, 2, 3, 4, 5, 6, 7].includes(s.v)) return f; // save hỏng hoặc phiên bản lạ thì dùng bản sạch (v1 của M0/M1, v2 của M2, v3 của M3/M3b, v4 của M4/M4b, v5 của M5, v6 của M5b–M7 vẫn nhận; v7 từ R1)
@@ -2462,6 +2553,7 @@ function sanitize(s) {                          // gộp save cũ vào mặc đ�
     if (f.npc.talk === 'coop' && !f.invite) f.npc.talk = null; // chưa có lời mời thì không mở lại cảnh mời
     f.menh = cleanMenh(s.menh);                 // M5b: save v5 trở xuống không có trường này → null (không gắn), game chạy y như M5
     f.clan = cleanClan(s.clan);                 // R1: save v6 trở xuống (và mã VTNG1, VTNG2 cũ) không có → null → màn rút gọn 2 trang, tiến trình giữ nguyên (D23 e)
+    f.trials = cleanTrials(s.trials);           // R3b: phép thử đã làm; save cũ không có → {}
     if (!f.clan) f.draft = cleanDraft(s.draft, true); // R1: người chơi cũ đang làm dở màn rút gọn: giữ ba câu và tộc đang chọn
   }
   if (f.npc.talk && !f.player.inside) f.npc.talk = null; // đang nói chuyện thì phải đang ở trong địa điểm; không thì bỏ cờ (tiến độ vẫn giữ)
@@ -2488,6 +2580,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) flush
 function writeSave() {                          // ghi state xuống trình duyệt
   if (mergeDisk()) setTimeout(refreshEco, 0);   // M4: tab khác vừa ghi sổ mới hơn thì lấy sổ đó trước, để lần ghi này không đè mất giao dịch của tab kia
   if (mergeClan()) setTimeout(refreshClan, 0);  // R1: tộc cũng vậy (đổi tộc không đi qua sổ)
+  if (mergeTrials()) setTimeout(refreshTrials, 0); // R3b: phép thử cũng vậy: tab khác xong trước thì lấy về, không ghi đè
   state.savedAt = Date.now();                   // đóng dấu thời gian lưu
   try { localStorage.setItem(saveKey(), JSON.stringify(state)); storageOK = true; } // ghi thành công. M6: ghi vào ô của người đang chơi
   catch (e) { storageOK = false; }              // ghi thất bại: báo người chơi dùng mã lưu
@@ -3957,6 +4050,7 @@ function chaptersOf(id) {                       // các chương của một tuy
   if (id === 'step24') return [{ title: S24.title, nodes: S24.nodes }]; // cảnh bước 24: một chương
   if (id === 'pact') return [{ title: QD.name, nodes: QD.scene }]; // M5: cảnh giao lời hẹn, một chương
   if (id === 'coop') return [{ title: ID.title, nodes: ID.scene }]; // M5: cảnh lời mời hợp tác, một chương
+  const tt = trOf(id); if (tt) return [{ title: tt.title, nodes: trNodes(tt) }]; // R3b: cảnh phép thử, một chương
   const dl = D.dialogues[id]; return dl ? dl.chapters : [{ title: '', nodes: [{ id: 'n1', t: '…', end: true }] }]; // thiếu dữ liệu thì một câu rỗng, không làm vỡ game
 }
 const isDeep = (id) => { const c = comOf(id); return !!(c && c.deep); }; // tuyến sâu (D3)
@@ -4113,13 +4207,14 @@ function nextOf(id, node) {                     // câu kế tiếp: theo next, 
   const nodes = chaptersOf(id)[lineRec(id).ch].nodes, i = nodes.findIndex((q) => q.id === node.id);
   return nodes[i + 1] ? nodes[i + 1].id : null;
 }
-const lineOwner = (id) => (id === 'pact' ? (state.pact && state.pact.with) : id === 'coop' ? ID.from : id); // M5: chủ của tuyến: cảnh lời hẹn thuộc người đã hứa, cảnh lời mời thuộc Viễn Tân
+const lineOwner = (id) => (id === 'pact' ? (state.pact && state.pact.with) : id === 'coop' ? ID.from : TLINES.includes(id) ? trOf(id).who : id); // M5: chủ của tuyến: cảnh lời hẹn thuộc người đã hứa, cảnh lời mời thuộc Viễn Tân
 const whoOf = (id, node) => node.who || (id === 'step24' ? 'narr' : lineOwner(id)); // ai đang nói câu này
 function whoName(w) { if (w === 'me') return state.char ? state.char.name : 'Bạn'; if (w === 'narr') return ''; const c = comOf(w); return c ? c.leader.name : ''; } // tên người nói, để ghi trong dòng cũ
 function talkAt(id) { if (id === 'step24') return S24.at; const c = comOf(lineOwner(id)); return c ? c.leader.at : null; } // tuyến này nói ở đâu (M5: chủ không có thật thì null, openTalk sẽ từ chối)
 function openTalk(id, opt = {}) {               // mở (hoặc mở lại) một cuộc trò chuyện
   if (!state.char || !isLine(id)) return;       // tuyến lạ thì thôi
   if (QLINES.includes(id) && !qTalkOK(id)) return; // M5: cảnh lời hẹn / lời mời chỉ mở khi đang có việc đó (hoặc đang đọc câu đáp sau khi chọn)
+  if (TLINES.includes(id) && !trTalkOK(id)) { if (state.npc.talk === id) state.npc.talk = null; return; } // R3b: phép thử chỉ mở khi xong hẳn bước 24 và chưa làm (hoặc đang đọc câu đáp); cờ mở dở cũ thì bỏ
   if (!state.player.inside || state.player.at !== talkAt(id)) return; // phải đang ở trong đúng địa điểm của người đó
   if (TK && TK.closing) TK.closing();           // màn cũ đang đóng dở (hiệu ứng 0,3 giây): đóng hẳn ngay rồi mới mở
   if (TK && TK.id === id && !tkEl.hidden) return; // đang mở rồi
@@ -4130,7 +4225,7 @@ function openTalk(id, opt = {}) {               // mở (hoặc mở lại) mộ
     S24.cast.forEach(metNow);                   // gặp cả ba tộc trưởng
   } else {
     if (!canTalk()) return;                     // trò chuyện riêng mở sau bước 24
-    metNow(lineOwner(id));                      // gặp lần đầu thì ghi ngày (M5: cảnh lời hẹn / lời mời ghi cho chủ tuyến)
+    if (TLINES.includes(id)) trPrep(id); else metNow(lineOwner(id)); // R3b: phép thử KHÔNG ghi "đã gặp" (không đụng quan hệ); chỉ xáo và nhớ thứ tự lựa chọn. Tuyến khác: gặp lần đầu thì ghi ngày (M5: cảnh lời hẹn / lời mời ghi cho chủ tuyến)
   }
   const r = lineRec(id), chs = chaptersOf(id);
   if (!r.node) {                                // chưa mở chương nào dở: chọn chỗ bắt đầu
@@ -4165,12 +4260,14 @@ function renderTalk() {                         // vẽ nội dung màn hội th
   const say = $('#tk-say'); say.classList.toggle('nr', who === 'narr'); // lời kể thì chữ nghiêng
   $('#tk-sr').textContent = (cm ? cm.leader.name + ': ' : '') + text; // bản đủ câu cho trình đọc màn hình (chữ hiện dần thì bị ẩn khỏi trình đọc)
   paintSay();                                   // hiện số chữ đã tới
+  if (TK.nk !== id + '/' + node.id) { TK.nk = id + '/' + node.id; TK.readyAt = 0; } // R3b: sang câu mới thì bấm giờ lại khi chữ hiện đủ
+  if (TK.reveal >= TK.len) markReady();         // R3b: chữ đã đủ ngay (mở lại câu cũ, tắt chuyển động): bấm giờ luôn
   let btns = '';                                // các nút bên dưới lời thoại
   if (node.ch) {                                // câu có lựa chọn
-    const list = node.ch.filter((q) => !(q.once && r.seen.includes(q.id)) && chOK(id, q.id)); // câu hỏi đã hỏi rồi thì ẩn. M5: lựa chọn của lời hẹn hiện theo túi đồ (còn món / hết món)
+    const list = trSort(id, node.ch.filter((q) => !(q.once && r.seen.includes(q.id)) && chOK(id, q.id))); // R3b: phép thử hiện theo thứ tự đã xáo // câu hỏi đã hỏi rồi thì ẩn. M5: lựa chọn của lời hẹn hiện theo túi đồ (còn món / hết món)
     btns = `<div class="tchs" role="group" aria-label="Lựa chọn của bạn">${list.map((q, i) => `<button type="button" class="tc" data-ch="${esc(q.id)}"><b aria-hidden="true">${i + 1}</b><span>${esc(fillTalk(q.t))}</span></button>`).join('')}</div>`;
   } else if (node.end) {                        // hết chương
-    const one = id === 'step24' || QLINES.includes(id); // cảnh một chương (bước 24, M5 lời hẹn, lời mời): nút "Xong" thay "Chào tạm biệt"
+    const one = id === 'step24' || QLINES.includes(id) || TLINES.includes(id); // cảnh một chương (bước 24, M5 lời hẹn, lời mời): nút "Xong" thay "Chào tạm biệt"
     const more = !one && !node.again && r.ch < chs.length - 1; // còn chương sau
     btns = more ? `<div class="tnav"><button type="button" class="tgo" data-tk="more"><b aria-hidden="true">續</b>Nghe tiếp chương ${r.ch + 2}</button><button type="button" class="tlv" data-tk="leave">Rời đi</button></div>`
       : `<div class="tnav"><span class="tend">${node.again ? '' : one ? 'Hết cuộc gặp' : isDeep(id) ? `Hết chương ${r.ch + 1}/${chs.length}` : 'Hết chuyện'}</span><button type="button" class="tgo" data-tk="leave"><b aria-hidden="true">別</b>${one ? 'Xong' : 'Chào tạm biệt'}</button></div>`; // hết chương: cảnh một chương có nút Xong, tuyến thường có Chào tạm biệt
@@ -4186,7 +4283,7 @@ function paintSay() {                           // hiện chữ dần dần theo
   say.textContent = n >= TK.len ? TK.text : [...TK.text].slice(0, n).join(''); // cắt theo ký tự thật
 }
 function focusTalk() { const ctl = $('#tk-ctl'), b = ctl.querySelector('button'); if (b && !ctl.contains(document.activeElement)) b.focus({ preventScroll: true }); } // chữ hiện xong: tiêu điểm vào nút đầu tiên (người dùng bàn phím bấm Enter là đi tiếp)
-function revealAll() { if (!TK || TK.reveal >= TK.len) return false; TK.reveal = TK.len; paintSay(); $('#tk-ctl').classList.remove('wait'); const b = $('#tk-ctl').querySelector('button'); if (b) b.focus({ preventScroll: true }); return true; } // bấm khi chữ đang chạy: hiện hết câu ngay
+function revealAll() { if (!TK || TK.reveal >= TK.len) return false; TK.reveal = TK.len; paintSay(); markReady(); $('#tk-ctl').classList.remove('wait'); const b = $('#tk-ctl').querySelector('button'); if (b) b.focus({ preventScroll: true }); return true; } // bấm khi chữ đang chạy: hiện hết câu ngay
 function pushHist(r, w, t) { r.hist.push({ w, t }); if (r.hist.length > 3) r.hist.splice(0, r.hist.length - 3); } // ghi câu vừa qua, giữ 3 câu
 function advanceTalk() {                        // nút Tiếp
   if (!TK || TK.closing || revealAll()) return;               // chữ chưa hiện hết: lần bấm này chỉ hiện hết chữ
@@ -4199,7 +4296,7 @@ function chooseTalk(cid) {                      // người chơi bấm một l�
   if (!TK || TK.closing || revealAll()) return;
   const id = TK.id, r = lineRec(id), node = curNode(id), q = node.ch && node.ch.find((x) => x.id === cid); if (!q || !chOK(id, cid)) return; // M5: lựa chọn đang ẩn thì không nhận (ví dụ bấm phím số)
   const said = [fillTalk(node.t), fillTalk(q.t)]; // chữ của câu hỏi và câu trả lời, lấy TRƯỚC khi state đổi (giá, tên món còn đúng như lúc người chơi thấy)
-  const nx = id === 'pact' ? questChoice(cid) : id === 'coop' ? inviteChoice(cid) : q.next; // M5: lời hẹn và lời mời đổi state (ghi sổ nếu có) rồi mới biết rẽ đi đâu
+  const nx = id === 'pact' ? questChoice(cid) : id === 'coop' ? inviteChoice(cid) : TLINES.includes(id) ? trialChoice(id, cid) : q.next; // M5: lời hẹn và lời mời đổi state (ghi sổ nếu có) rồi mới biết rẽ đi đâu
   if (!nx) { renderTalk(); return; }            // M5: không làm được (TK.note ghi lý do): giữ nguyên câu hỏi
   TK.note = '';                                 // M5: làm được thì xoá lời báo cũ
   pushHist(r, whoOf(id, node), said[0]); pushHist(r, 'me', said[1]); // câu hỏi của NPC và câu trả lời của người chơi lên dòng cũ
@@ -4216,6 +4313,7 @@ function recordPact(cid) {                      // ghi lựa chọn quan hệ–
   state.quest = freshQuest(state.pact);         // M5: quest "Lời hẹn ở Chợ" mở ngay; "Chưa hứa với ai" thì quest đã có kết quả, chỉ còn xem hệ quả
   state.invite = null;                          // M5: lời mời tới sau màn hệ quả
   state.onb = D.onboarding.doneStep;            // xong bước 24 → bước 9: lời chúc
+  recT01(cid, item);                            // R3b: T01 ghi bản ghi `trial` (lần chọn đầu tiên)
 }
 function endChapter() {                         // đóng một chương đã đọc tới câu cuối
   const id = TK.id, r = lineRec(id), chs = chaptersOf(id), node = curNode(id); if (!node.end) return;
@@ -4247,7 +4345,7 @@ function closeTalk(instant) {                   // ẩn màn hội thoại
 }
 function tickTalk(dtR) {                        // mỗi khung: chữ hiện dần, vẽ chân dung
   if (!TK || tkEl.hidden) return;
-  if (TK.reveal < TK.len) { TK.reveal = Math.min(TK.len, TK.reveal + dtR * 62); paintSay(); if (TK.reveal >= TK.len) { $('#tk-ctl').classList.remove('wait'); focusTalk(); } } // khoảng 62 chữ mỗi giây
+  if (TK.reveal < TK.len) { TK.reveal = Math.min(TK.len, TK.reveal + dtR * 62); paintSay(); if (TK.reveal >= TK.len) { markReady(); $('#tk-ctl').classList.remove('wait'); focusTalk(); } } // khoảng 62 chữ mỗi giây. R3b: chữ đủ thì bấm giờ
   drawTalkPortrait();
 }
 function drawTalkPortrait() {                   // chân dung lớn bên trái: thở, chớp mắt, mấp máy môi khi chữ đang chạy
@@ -4281,7 +4379,7 @@ function pplHTML(l) {
   return `<div class="ah">Người ở đây<span>${ok ? `${ps.length} tộc trưởng` : mt ? 'đang đợi bạn' : 'trò chuyện mở sau bước đầu'}</span></div>
     <ul class="ppl">${ps.map((c) => { const L = c.leader, lb = mt ? (state.onb === 8 ? 'Nói tiếp' : 'Gặp') : ok ? talkLabel(c.id) : 'Trò chuyện';
       const qb = ok && !mt ? qBtnHTML(c.id) : ''; // M5: nút "Lời hẹn" (người đã hứa) hoặc "Lời mời" (Viễn Tân) đặt trên nút Trò chuyện
-      return `<li><canvas class="pp" data-pp="${esc(c.id)}" aria-hidden="true"></canvas><span class="pi"><span class="pn">${esc(L.name)} <span class="hz" lang="zh-Hant">${esc(c.clanHan)}</span></span><span class="pr">${esc(L.title.replace('Tộc trưởng, ', ''))} · ${esc(c.name)}</span><span class="ps">${esc(lineStatus(c.id))}</span></span><span class="tbs">${qb}<button type="button" class="tb${ok || mt ? '' : ' lk'}" data-talk="${esc(c.id)}" data-fid="p-${esc(c.id)}"${ok || mt ? '' : ' aria-disabled="true"'}>${ok || mt ? '' : LOCK_SVG}${esc(lb)}</button></span></li>`; }).join('')}</ul>
+      return `<li><canvas class="pp" data-pp="${esc(c.id)}" aria-hidden="true"></canvas><span class="pi"><span class="pn">${esc(L.name)} <span class="hz" lang="zh-Hant">${esc(c.clanHan)}</span></span><span class="pr">${esc(L.title.replace('Tộc trưởng, ', ''))} · ${esc(c.name)}</span><span class="ps">${esc(lineStatus(c.id))}</span></span><span class="tbs">${qb}<button type="button" class="tb${ok || mt ? '' : ' lk'}" data-talk="${esc(c.id)}" data-fid="p-${esc(c.id)}"${ok || mt ? '' : ' aria-disabled="true"'}>${ok || mt ? '' : LOCK_SVG}${esc(lb)}</button></span></li>${trRowHTML(c, l)}`; }).join('')}</ul>
     ${inMsg && inMsgAt === 'ppl' ? `<p class="inote" id="in-note" role="status">${esc(inMsg)}</p>` : ''}`;
 }
 function bindPpl(body) {                        // gắn nút trò chuyện và vẽ chân dung nhỏ
@@ -4560,6 +4658,7 @@ function refreshClan() {                        // R1: vẽ lại sau khi lấy 
 function refreshEco() { renderPurse(); if (state.player.inside) renderInside(); if (state.selected && state.selected.kind === 'me' && !$('#card').hidden) renderCard(); renderGuide(); } // vẽ lại các chỗ hiện xu, túi, sổ
 window.addEventListener('storage', (e) => { if (e.key === saveKey() && mergeDisk()) refreshEco(); }); // tab khác vừa ghi: cập nhật ngay số xu đang hiện
 window.addEventListener('storage', (e) => { if (e.key === saveKey() && mergeClan()) refreshClan(); }); // R1: tab khác vừa chốt / đổi tộc
+window.addEventListener('storage', (e) => { if (e.key === saveKey() && mergeTrials()) refreshTrials(); }); // R3b: tab khác vừa xong một phép thử
 function post(key, kind, memo, make) {          // ghi MỘT bút toán. make(get) trả {lines, after} hoặc {error}; get(tài khoản, đơn vị) = số dư hiện tại
   if (!state.char) return { error: 'Chưa có nhân vật.' };
   if (typeof key !== 'string' || !key) return { error: 'Lệnh thiếu mã.' }; // lệnh nào cũng phải có mã, để gửi lại không bị ghi hai lần
@@ -5024,6 +5123,74 @@ function qAdvance() {                           // xem hệ quả xong và qua b
   const Q = state.quest; // quest hiện tại
   if (Q && Q.seen && Q.jnl && !state.invite) state.invite = { st: 'open', at: nowMs(), dec: 0, paidAt: 0, eid: 0 }; // lời mời mở, nhớ lúc mời
 }
+/* ----- R3b (D27): các cảnh phép thử T02–T06 ----- */
+const TNODES = {};                              // bộ nhớ đệm: các câu của từng cảnh (dựng một lần)
+function trNodes(t) {                           // ba câu của cảnh: hai câu mở, câu hỏi có ba lựa chọn, câu đáp chung
+  return TNODES[t.id] || (TNODES[t.id] = [
+    { id: 't1', t: t.open[0] },                 // câu mở thứ nhất của NPC
+    { id: 't2', t: t.open[1], ch: t.opts.map((o) => ({ id: o.id, t: o.t, next: 'rp' })) }, // câu hỏi chính; cả ba lựa chọn đều rẽ tới CÙNG một câu đáp
+    { id: 'rp', t: t.reply, end: true }         // câu đáp giống hệt cho mọi lựa chọn (D12: không khen chê)
+  ]);
+}
+function trTalkOK(id) {                         // cảnh phép thử có mở được không
+  const t = trOf(id); if (!t || !canTalk() || state.onb < TD.from) return false; // phải xong hẳn bước 24 (onb >= 10)
+  const m = state.trials[t.id], r = state.npc.lines[id];
+  return !(m && m.opt) || (!!r && r.node === 'rp'); // chưa chọn, hoặc đang đọc dở câu đáp sau khi chọn (tải lại ngay sau đó)
+}
+function trPrep(id) {                           // lần mở đầu của một phép thử: xáo thứ tự ba lựa chọn và nhớ, để tải lại không đổi
+  const t = trOf(id); if (!t) return;
+  const m = state.trials[t.id] || (state.trials[t.id] = { ord: null, t0: 0, opt: null, at: 0 }); // ô của phép thử này
+  if (m.opt || m.ord) return;                   // đã chọn rồi, hoặc đã xáo rồi: giữ nguyên
+  const k = t.opts.map((o) => o.id);            // ['a', 'b', 'c']
+  for (let i = k.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [k[i], k[j]] = [k[j], k[i]]; } // xáo Fisher–Yates, giống màn ba câu
+  m.ord = k;                                    // nhớ thứ tự đã hiện (ghi vào bản ghi là `ord`)
+}
+function trSort(id, list) {                     // sắp các nút lựa chọn theo thứ tự đã xáo của phép thử này
+  const t = trOf(id), m = t && state.trials[t.id]; if (!m || !m.ord) return list; // không phải phép thử, hoặc chưa có thứ tự: để nguyên
+  return m.ord.map((k) => list.find((q) => q.id === k)).filter(Boolean); // theo ord; lựa chọn nào thiếu thì bỏ
+}
+function markReady() {                          // chữ của câu đang đọc đã hiện đủ lần đầu: bấm giờ
+  if (!TK || TK.readyAt) return;                // đã bấm rồi
+  TK.readyAt = performance.now();               // mốc trong tab này (dùng cho T01)
+  const t = trOf(TK.id); if (!t || !curNode(TK.id).ch) return; // chỉ phép thử, và chỉ ở câu có lựa chọn
+  const m = state.trials[t.id]; if (m && !m.opt && !m.t0) { m.t0 = nowMs(); scheduleSave(); } // mốc bền: tải lại giữa chừng thì ms tính cả lúc đóng trang, như ba câu
+}
+function trRowHTML(c, l) {                      // hàng "Việc đang chờ ý kiến" ngay dưới tộc trưởng c ở địa điểm l
+  if (!state.char || state.onb < TD.from) return ''; // chưa xong hẳn bước 24
+  return TLIST.filter((t) => t.who === c.id && t.at === l.id && !(state.trials[t.id] && state.trials[t.id].opt)) // phép thử của người này, ở đây, chưa làm
+    .map((t) => `<li class="trq"><span class="pi"><span class="pr">${esc(TD.rowLabel)}</span></span><span class="tbs"><button type="button" class="tb" data-qtalk="${esc(trLine(t))}" data-fid="tr-${esc(t.id)}">${esc(TD.rowBtn)}</button></span></li>`).join(''); // không nêu đề tài, không dấu son
+}
+function recTrial(t, o, ms, ord, xu, at) {      // đưa bản ghi `trial` của T02–T06 vào hàng chờ
+  recPush('trial', 'tr' + t.id.slice(1) + '.' + recGen(), at, { id: t.id, v: TD.v, opt: o.id, tags: o.tags.slice(), b: state.clan ? state.clan.b : null, ms, ord: ord.slice(), offer: { xu } }); // không ghi chữ, xu trong ví, túi (bất biến); offer = thưởng của lời đề nghị
+}
+function recT01(cid, item) {                    // T01 = cảnh bước 24: trước R3b chưa sinh bản ghi. Chỉ lần chọn đầu tiên của nhân vật
+  const T1 = TD.t01, tags = T1.tags[cid]; if (!tags) return; // lựa chọn lạ thì thôi
+  if (state.trials.T01 && state.trials.T01.opt) return; // đã ghi rồi: không ghi lần hai
+  const at = nowMs(), ms = TK && TK.readyAt ? clamp(Math.round(performance.now() - TK.readyAt), 0, 86400000) : null; // thời gian từ lúc câu hỏi hiện đủ tới lúc chọn (tính trong lần mở này)
+  state.trials.T01 = { ord: null, t0: 0, opt: cid, at }; // nhớ T01 đã làm (đếm đủ 6 phép thử)
+  recPush('trial', 'tr01.' + recGen(), at, { id: T1.id, v: T1.v, opt: cid, tags: tags.slice(), b: state.clan ? state.clan.b : null, ms, ord: null,
+    offer: { kimtam: 0, camquan: offerPrice('camquan', item), thietgiap: offerPrice('thietgiap', item), none: 0 } }); // offer = xu của ba lời đề nghị lúc cảnh bắt đầu (tặng và giữ = 0): để R5 tách nhiễu thưởng
+}
+function trialChoice(id, cid) {                 // người chơi chọn trong một phép thử → trả câu đáp 'rp', hoặc null nếu không làm được
+  const t = trOf(id), o = t && t.opts.find((x) => x.id === cid); if (!t || !o) return null; // lựa chọn lạ: không nhận
+  mergeTrials();                                // tab khác có thể vừa xong phép thử này
+  const m = state.trials[t.id] || (state.trials[t.id] = { ord: null, t0: 0, opt: null, at: 0 });
+  if (m.opt) return 'rp';                       // đã chọn rồi (tab khác hoặc lần trước): KHÔNG ghi lần hai, chỉ đọc câu đáp
+  const at = nowMs(); // giờ chọn
+  const ms = clamp(m.t0 ? at - m.t0 : TK && TK.readyAt ? Math.round(performance.now() - TK.readyAt) : 0, 0, 86400000); // từ lúc câu hỏi hiện đủ; tối đa 1 ngày
+  const ord = m.ord ? m.ord.slice() : t.opts.map((x) => x.id); // thứ tự đã hiện
+  const commit = (xu) => { m.opt = cid; m.at = at; recTrial(t, o, ms, ord, xu, at); }; // chốt lựa chọn và xếp bản ghi vào hàng chờ
+  const who = comOf(t.who).leader.name;         // tên NPC của cảnh, cho dòng trong sổ thu chi
+  const r = post(`trial-${t.id}`, 'trial', `Công góp ý với ${who}: Hội đồng Bến Chín trả ${TD.reward} xu`, () => ({ // mã cố định theo phép thử: tải lại, hai tab, gửi lại đều không ghi hai lần. Lời ghi như nhau cho mọi lựa chọn
+    lines: [['hoidong', 'xu', -TD.reward], ['vi', 'xu', TD.reward]], // Hội đồng (Có) trả vào Ví (Nợ); cùng một số xu cho cả ba lựa chọn
+    after: () => commit(TD.reward)              // chạy cùng lần ghi sổ: tải lại thì hoặc có cả thưởng lẫn lựa chọn, hoặc chưa có gì
+  }));
+  if (r.dup) { mergeTrials(); if (state.trials[t.id] && state.trials[t.id].opt) return 'rp'; } // đã trả ở tab khác: lấy lựa chọn của tab đó, không ghi
+  if (!r.ok) { commit(0); writeSave(); }        // không trả được thưởng (lỗi sổ): vẫn ghi lựa chọn với thưởng 0, không chặn người chơi
+  else { afterMoney(); coinFly(document.querySelector('#tk-ctl'), TD.reward); } // vẽ lại xu; số xu bay lên
+  return 'rp';                                  // câu đáp chung
+}
+
 function inviteChoice(cid) {                    // trả lời lời mời của Viễn Tân → câu đáp
   mergeDisk(); const v = state.invite; if (!v) return null; // đọc đĩa mới nhất; chưa có lời mời thì không làm gì
   if (cid === 'later') return 'rl';             // để sau: lời mời còn mở, không hạn
@@ -6525,7 +6692,7 @@ function finishCreate() {                       // nút Vào Bến Chín
   state.char = { name: CR.name.trim(), look: { ...CR.look }, gender: CR.gender, goal: CR.goal, job: CR.job }; // nhân vật chính thức (R1b: kèm giới của dáng nhân vật)
   state.clan = makeClan();                      // R1: tộc gợi ý, câu trả lời thô, tộc tự chọn
   recNewClan(); recAvatar(state.clan.at);       // R2: ba câu, tộc B và dáng nhân vật vào hàng chờ (gửi ở lần nhận thưởng đầu tiên). Không có mã mời thì không làm gì
-  state.draft = null; state.onb = 1; state.eco = freshEco(); syncCache(state); // bắt đầu onboarding từ bước 1, sổ mới tinh: ví 0 xu, túi rỗng (M4)
+  state.draft = null; state.onb = 1; state.trials = {}; state.eco = freshEco(); syncCache(state); // bắt đầu onboarding từ bước 1, sổ mới tinh: ví 0 xu, túi rỗng (M4)
   closeSheet(true); if (state.selected) { state.selected = null; $('#card').hidden = true; } // save cũ có thể đang mở danh mục / thẻ: đóng để lời nhắc hiện ra
   writeSave();                                  // lưu ngay
   renderPurse(); syncMarkers();
@@ -6839,6 +7006,7 @@ function boot(data) {                           // khởi động game
     menh: { set: menhSet, open: openMenh, person: () => menhPerson() && menhPerson().id, fx: (iso) => menhFx(iso ? Date.parse(iso) : nowMs()), wage: () => wageFor(), price: (id) => myPrice(id), priceAt: (id, iso, first) => myPriceAt(id, Date.parse(iso), !!first), sell: (id) => mySell(id), gear: () => myGearPrice(), cap: () => shiftCap(), dur: () => durMul(), fees: () => prodFees(E.recipes[0]), out: () => prodOut(E.recipes[0]), coop: () => coopPay() },
     // M6 (D19): cửa kiểm thử doanh nghiệp và người chơi. Mọi lệnh đi qua đúng hàm giao diện dùng, kiểm quyền từ ô chung (SEC-01, ORG-01)
     org: { world: () => JSON.parse(JSON.stringify(loadWorld())), S: () => (loadWorld(), JSON.parse(JSON.stringify(W_S))), cur: () => curPid, players: () => loadWorld().players.map((p) => p.id), add: addPlayer, sw: switchPlayer, del: delPlayer, ensure: ensureRepInvites, accept, decline, confirm: confirmJoin, reinvite, leave: leaveOrg, invite: invitePlayer, setRole, suspend: (o, p) => memberOp(o, p, 'suspend'), reopen: (o, p) => memberOp(o, p, 'reopen'), remove: (o, p) => memberOp(o, p, 'remove'), simRole, docs: docList, doc: docOpen, members: membersOf, floor: enterFloor, journalOf, can: canMe, cell: cellOf, eval: evalCell, pub: Object.assign(() => orgPublic(), { propose: pubPropose, decide: pubDecide, withdraw: pubWithdraw, unpublish: pubUnpublish, list: pubList, shared: pubShared, sweep: () => { loadWorld(); return sweepPub(); } }), audit: auditView, clock: (ms) => { clockOff = +ms || 0; return nowMs(); }, mine: () => { loadWorld(); const m = myOrg(); return m ? { org: m.o.id, st: m.m.st, role: m.m.role, share: m.m.share } : null; }, encodeAll, loadAll: (c) => { const o = decodeAll(c); return o ? loadAll(o) : { ok: false }; }, openOrg, openOrgs, openSeats, closeSeats },
+    tr: { state: () => JSON.parse(JSON.stringify(state.trials)), choose: trialChoice, ok: trTalkOK, merge: mergeTrials, row: (c, l) => trRowHTML(c, l), cfg: () => TD }, // R3b: cửa kiểm thử phép thử (chỉ đọc state và gọi đúng hàm giao diện dùng)
     rec: { q: () => recRead(curPid), code: recCode, flush: recFlush, gen: recGen, revoke: recRevoke, on: () => !!RS.endpoint }, // R2: cửa kiểm thử hàng chờ (chỉ đọc và gửi; không có đường nào hiện bản ghi trong giao diện)
     clan: { score: clanScore, set: (t) => { if (!state.clan || !isType(t)) return { ok: false }; clanArm = t; return clanPick(t) || { ok: state.clan.b === t }; }, info: () => ({ clan: state.clan && JSON.parse(JSON.stringify(state.clan)), draft: state.draft && state.draft.qz ? JSON.parse(JSON.stringify(state.draft)) : null, mode: CR && !crEl.hidden ? CR.mode : null, page: CR && !crEl.hidden ? CR.page : null, qi: CR && CR.qz ? CR.qz.qi : null, cord: CR && CR.qz && CR.qz.cord ? CR.qz.cord.slice() : null }) } }; // R1 (D23): score(a) tính Q như game; set(t) đổi tộc như bấm hai lần ở thẻ Đời tôi; info() đọc tộc, bản nháp và màn đang mở // M5b: cửa kiểm thử mệnh bàn: gắn / gỡ, đọc hệ số đang áp và từng con số // cửa nhỏ để kiểm thử. M4b: cal.at đặt đồng hồ game tới một giờ tuyệt đối (ví dụ "2026-02-04T02:54+07:00"), cal.info đọc lịch M4: eco = gọi thẳng lệnh kinh tế kèm mã lệnh tự chọn (FIN-01, FIN-02), đặt lệch đồng hồ để thử đổi ngày
   document.fonts && document.fonts.ready.then(() => { if (VIG) buildVig(VIG.id); }); // font chữ Hán tải xong thì vẽ lại biển hiệu trong tranh nội cảnh
